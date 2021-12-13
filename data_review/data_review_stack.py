@@ -57,7 +57,7 @@ class DataReviewStack(cdk.Stack):
             runtime=_lambda.Runtime.PYTHON_3_8,
             handler='index.handler',
             code=_lambda.Code.from_asset(
-                "lambda/orchestrator",
+                "lambda/bottle_handler",
                 bundling=core.BundlingOptions(
                     image=_lambda.Runtime.PYTHON_3_8.bundling_image,
                     command=[

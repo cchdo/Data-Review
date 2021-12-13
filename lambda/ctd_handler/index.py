@@ -65,7 +65,7 @@ def handler(event, context):
     print('request: {}'.format(json.dumps(event)))
 
     BUCKET_NAME = os.environ['S3_BUCKET_NAME']
-    key = event['Records'][0]['s3']['object']['key']
+    key = event['key']
     try:
         #Get file from bucket
         fname = '/tmp/' + key
