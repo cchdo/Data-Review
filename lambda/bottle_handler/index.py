@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 lambdaClient = boto3.client('lambda')
-s3 = boto3.client('s3')
+s3 = boto3.resource('s3')
 ddb = boto3.resource('dynamodb')
 failure_table = ddb.Table(os.environ['FAILURE_TABLE'])
 output_table = ddb.Table(os.environ['RESULTS_TABLE'])
