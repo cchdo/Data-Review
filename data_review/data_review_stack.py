@@ -68,6 +68,7 @@ class DataReviewStack(cdk.Stack):
             ),
             environment=LAMBDA_ENVS,
             timeout=core.Duration.minutes(10),
+            memory_size=1024,
             profiling=True,
         )
 
@@ -87,6 +88,7 @@ class DataReviewStack(cdk.Stack):
             ),
             environment=LAMBDA_ENVS,
             timeout=core.Duration.minutes(10),
+            memory_size=1024,
             profiling=True,
         )
         LAMBDA_FUNC_NAMES = {
