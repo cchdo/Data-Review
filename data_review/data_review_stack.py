@@ -28,6 +28,7 @@ class DataReviewStack(cdk.Stack):
             sources=[s3deploy.Source.asset("./test_data")],
             destination_bucket=data_bucket,
         )
+        
         #Helper data structures
         file_process_queue = sqs.Queue(self, "FileProcessQueue")
         aggregate_results_db = ddb.Table(
