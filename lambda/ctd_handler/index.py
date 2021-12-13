@@ -80,7 +80,8 @@ def handler(event, context):
 
         #Write aggregate values to db
         print(df)
-    except:
+    except Exception as e:
+        print(e)
         item = {
             'filename': key,
             'function': FUNC_NAME,

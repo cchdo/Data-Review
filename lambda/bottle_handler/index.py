@@ -74,10 +74,11 @@ def handler(event, context):
         with open(fname, 'rb') as f:
             df = handle_csv(f)
         print("File Parsed")
-        
+
         #Write aggregate values to db
         print(df)
-    except:
+    except Exception as e:
+        print(e)
         item = {
             'filename': key,
             'function': FUNC_NAME,
