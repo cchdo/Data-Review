@@ -65,12 +65,15 @@ def handler(event, context):
     key = event['key']
     try:
         #Get file from bucket
+        print("Downloading File")
         fname = '/tmp/' + key
         s3.download_file(BUCKET_NAME, key, '/tmp/' + key)
+        print("File Downloaded")
 
         #Parse file
         with open(fname, 'rb') as f:
             df = handle_csv(f)
+        print("File Parsed")
         
         #Write aggregate values to db
         print(df)
