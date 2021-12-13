@@ -4,6 +4,7 @@ from aws_cdk import (
     aws_lambda as _lambda,
     aws_dynamodb as ddb,
     aws_s3 as s3,
+    aws_s3_deployment as s3deploy,
 )
 
 # For consistency with other languages, `cdk` is the preferred import name for
@@ -23,7 +24,10 @@ class DataReviewStack(cdk.Stack):
             removal_policy = core.RemovalPolicy.DESTROY,
             auto_delete_objects=True,
         )
-
+        s3deploy.BucketDeployment(self, "DeployTestData",
+            sources=[s3deploy.Source.asset("./test_data")],
+            destination_bucket=data_bucket,
+        )
         #Helper data structures
         file_process_queue = sqs.Queue(self, "FileProcessQueue")
         aggregate_results_db = ddb.Table(
