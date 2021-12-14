@@ -52,7 +52,7 @@ def handle_csv(byte_data):
     df = pd.read_csv(io.StringIO('\n'.join(without_header)))
 
     #RETURN HERE TO RETURN FULL DATAFRAME
-    #return df
+    return df
 
     #Get missingness rates
     missingness_rates = get_missingness(df)
