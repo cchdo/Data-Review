@@ -79,7 +79,7 @@ def handler(event, context):
         print("File Parsed")
 
         #Write aggregate values to db
-        total_observations = sum([len(df) for df in dfs]))]
+        total_observations = sum([len(df) for df in dfs])
         item = {
             'filename': key,
             'observations': total_observations
