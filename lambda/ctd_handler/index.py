@@ -79,7 +79,12 @@ def handler(event, context):
         print("File Parsed")
 
         #Write aggregate values to db
-        print(df)
+        item = {
+            'filename': key,
+            'missingness': df
+        }
+        print("Writing to DB")
+        output_table.put_item(Item=item)
     except Exception as e:
         print(e)
         item = {
