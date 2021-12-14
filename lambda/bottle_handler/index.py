@@ -78,7 +78,7 @@ def handler(event, context):
         #Write aggregate values to db
         item = {
             'filename': key,
-            'missingness_rates': json.dumps(df),
+            'observations': len(df)
         }
         print("Writing to DB")
         output_table.put_item(Item=item)

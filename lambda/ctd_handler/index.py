@@ -81,7 +81,7 @@ def handler(event, context):
         #Write aggregate values to db
         item = {
             'filename': key,
-            'missingness': df
+            'observations': len(df)
         }
         print("Writing to DB")
         output_table.put_item(Item=item)
