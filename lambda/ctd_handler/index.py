@@ -10,7 +10,7 @@ import numpy as np
 import zipfile
 
 lambdaClient = boto3.client('lambda')
-s3 = boto3.resource('s3')
+s3 = boto3.client('s3')
 ddb = boto3.resource('dynamodb')
 failure_table = ddb.Table(os.environ['FAILURE_TABLE'])
 output_table = ddb.Table(os.environ['RESULTS_TABLE'])
@@ -18,9 +18,6 @@ output_table = ddb.Table(os.environ['RESULTS_TABLE'])
 FUNC_NAME = os.environ['AWS_LAMBDA_FUNCTION_NAME']
 LOG_GROUP = os.environ['AWS_LAMBDA_LOG_GROUP_NAME']
 LOG_STREAM = os.environ['AWS_LAMBDA_LOG_STREAM_NAME']
-BUCKET_NAME = os.environ['S3_BUCKET_NAME']
-
-bucket = s3.Bucket(BUCKET_NAME)
 
 def get_missingness(df):
     
@@ -67,12 +64,13 @@ def handle_zip(byte_data):
 def handler(event, context):
     print('request: {}'.format(json.dumps(event)))
 
+    BUCKET_NAME = os.environ['S3_BUCKET_NAME']
     key = event['key']
     try:
         #Get file from bucket
         print("Downloading File")
         fname = '/tmp/' + key
-        bucket.download_file(key, '/tmp/' + key)
+        s3.download_file(BUCKET_NAME, key, '/tmp/' + key)
         print("File Downloaded")
 
         #Parse file
