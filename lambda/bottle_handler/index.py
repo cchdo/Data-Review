@@ -72,7 +72,7 @@ def handler(event, context):
 
         #Parse file
         with open(fname, 'rb') as f:
-            df = handle_csv(f)
+            df = handle_csv(f.read())
         print("File Parsed")
 
         #Write aggregate values to db
