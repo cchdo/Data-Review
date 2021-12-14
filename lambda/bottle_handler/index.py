@@ -17,6 +17,7 @@ output_table = ddb.Table(os.environ['RESULTS_TABLE'])
 FUNC_NAME = os.environ['AWS_LAMBDA_FUNCTION_NAME']
 LOG_GROUP = os.environ['AWS_LAMBDA_LOG_GROUP_NAME']
 LOG_STREAM = os.environ['AWS_LAMBDA_LOG_STREAM_NAME']
+BUCKET_NAME = os.environ['S3_BUCKET_NAME']
 
 def get_missingness(df):
     
@@ -61,7 +62,6 @@ def handle_csv(byte_data):
 def handler(event, context):
     print('request: {}'.format(json.dumps(event)))
     
-    BUCKET_NAME = os.environ['S3_BUCKET_NAME']
     key = event['key']
     try:
         #Get file from bucket
