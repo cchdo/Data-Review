@@ -31,7 +31,7 @@ def get_missingness(df):
     
     return missingness_rates
 def handle_zip(byte_data):
-    missingness = []
+    dfs = []
     with zipfile.ZipFile(byte_data) as zip:
         for subfile in zip.namelist():
             if subfile.endswith('.csv'):
@@ -55,11 +55,11 @@ def handle_zip(byte_data):
                     df = pd.read_csv(io.StringIO(''.join(without_header)))
                     
                     #CHANGE THIS TO RETURN FULL DATAFRAME
-                    #cols_in_subfile.append(df.columns)
+                    dfs.append(df)
                     
-                    missingness.append(get_missingness(df))
+                    dfs.append(get_missingness(df))
         #zip_cols.append(cols_in_subfile)
-    return missingness
+    return dfs
 
 def handler(event, context):
     print('request: {}'.format(json.dumps(event)))
@@ -75,13 +75,14 @@ def handler(event, context):
 
         #Parse file
         with open(fname, 'rb') as f:
-            df = handle_zip(f)
+            dfs = handle_zip(f)
         print("File Parsed")
 
         #Write aggregate values to db
+        total_observations = sum([len(df) for df in dfs])
         item = {
             'filename': key,
-            'missingness': df
+            'observations': total_observations
         }
         print("Writing to DB")
         output_table.put_item(Item=item)
