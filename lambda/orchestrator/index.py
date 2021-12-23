@@ -19,8 +19,9 @@ def handler(event, context):
     BOTTLE_HANDLER = os.environ['BOTTLE_HANDLER_FUNC_NAME']
     CTD_HANDLER = os.environ['CTD_HANDLER_FUNC_NAME']
 
-
     bucket = s3.Bucket(BUCKET_NAME)
+
+    #TODO: More robust identification of files - currently only looks at file extension
     for obj in bucket.objects.all():
         if obj.key.endswith('.csv'):
             lambdaClient.invoke(FunctionName=BOTTLE_HANDLER, InvocationType='Event', Payload=json.dumps({'key': obj.key}))

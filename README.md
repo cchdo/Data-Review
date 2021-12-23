@@ -19,70 +19,53 @@ Most of the infrastructure is specified in this Python file: [`data_review_stack
 In this stack, the Data Store is implemented as an S3 bucket. It uses [s3deploy](https://docs.aws.amazon.com/cdk/api/latest/docs/aws-s3-deployment-readme.html) to load any data in the `test_data/` directory into the bucket (under the hood, this creates another lambda function that is only called when the stack is created or updated).
 <br><br>
 Apart from the deployment lambda function, all lambda functions have **read-only** access to the bucket.
-### TODO:
 
 # Lambda Functions
 Lambda functions are specified in [`data_review_stack.py`](data_review/data_review_stack.py) - here you can change the memory allocation, max runtime, execution environment, etc. The actual function logic can be found in the `lambda/` directory.
+
+Each subfolder in the `lambda/` directory corresponds to a different **Handler Function**, and contains an `index.py` file with the function logic, and a `requirements.txt` file with any dependencies. The `requirements.txt` is parsed and handled when the stack is deployed, and dependencies are uploaded with the function logic during the build step (more on this below). 
 
 # Queue
 Currently, there is no queue implemented - the Orchestrator Function directly calls the Handler Functions. Using a queue has the benefit of being able to limit the concurrency of the Handler Functions (you could just change the `reserved_concurrent_executions` attribute in the specification for the Lambda Functions, but this would mean any calls that would go over the concurrency limit will fail, instead of waiting to be called later).
 
 A queue is not necessary for the basic functionallity described. However, if one wanted to add a queue to the implementation, they could use [SQS](https://docs.aws.amazon.com/cdk/api/latest/python/aws_cdk.aws_sqs/README.html).
 
-# Welcome to your CDK Python project!
+# Databases
+DynamoDB was used, primarily for simplicity - it can be swapped out for other DBMSs if needed.
 
-This is a blank project for Python development with CDK.
+The DynamoDB instances are `PAY_PER_REQUEST`, specified in `data_review_stack.py`, as opposed to explicitly provisioned read/write instances which is the default. This simplifies implementation - you don't have to worry about the concurrency of writes in Lambda functions (which would be very annoying given their stateless nature), and does not cost a signficant amount - [$1.25 per 1 million writes](https://aws.amazon.com/dynamodb/pricing/) as of writing.
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+It is unfortunately nontrival to download a csv snapshot of the databases (you can't just do a `SELECT * FROM table`). [DynamoDBtoCSV](https://github.com/edasque/DynamoDBtoCSV) is an external js tool that can do this, and it includes documentation on its usage.
 
-This project is set up like a standard Python project.  The initialization
-process also creates a virtualenv within this project, stored under the `.venv`
-directory.  To create the virtualenv it assumes that there is a `python3`
-(or `python` for Windows) executable in your path with access to the `venv`
-package. If for any reason the automatic creation of the virtualenv fails,
-you can create the virtualenv manually.
+# Building / Deploying
 
-To manually create a virtualenv on MacOS and Linux:
+## Github Actions
+Building / deploying the stack is handled through Github Actions. [`main.yml`](./.github/workflows/main.yml) is the main workflow file. The workflow can be manually run to build and deploy the stack, or it can be configured triggered by a push to the repository (this is currently disabled, but can be enabled by uncommenting some lines in the `main.yml` file).
 
+AWS Keys are configured using Github Secrets. For compatibility with the Actions workflow, name your key ID and secret key `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY`, respectively. Also, save the desired region to deploy to as `AWS_REGION` (e.g. `us-east-1`).
+
+## Manual Deployment
+Working with AWS credentials from multiple AWS accounts can get annoying and messy, I've found this VS Code extension helpful for dealing with this: [AWS CLI Configure](https://marketplace.visualstudio.com/items?itemName=mark-tucker.aws-cli-configure).
+
+
+### Prerequisites:
+- [AWS CLI](https://aws.amazon.com/cli/)
+- AWS credentials locally configured (`aws configure`)
+- [CDK](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html#getting_started_install) (`npm install -g aws-cdk`)
+- [Docker](https://www.docker.com/products/docker-desktop)
+- [Python](https://www.python.org/downloads/) (Only tested so far on 3.8)
+
+### Steps:
+
+
+- Clone the repository
+- Create a virtual environment, and install the necessary CDK packages
 ```
-$ python -m venv .venv
+python -m venv .venv
+source .venv/Scripts/activate
+pip install -r requirements.txt
 ```
-
-After the init process completes and the virtualenv is created, you can use the following
-step to activate your virtualenv.
-
+- Build and deploy the stack
 ```
-$ source .venv/bin/activate
+cdk synth; cdk deploy
 ```
-
-If you are a Windows platform, you would activate the virtualenv like this:
-
-```
-% .venv\Scripts\activate.bat
-```
-
-Once the virtualenv is activated, you can install the required dependencies.
-
-```
-$ pip install -r requirements.txt
-```
-
-At this point you can now synthesize the CloudFormation template for this code.
-
-```
-$ cdk synth
-```
-
-To add additional dependencies, for example other CDK libraries, just add
-them to your `setup.py` file and rerun the `pip install -r requirements.txt`
-command.
-
-## Useful commands
-
- * `cdk ls`          list all stacks in the app
- * `cdk synth`       emits the synthesized CloudFormation template
- * `cdk deploy`      deploy this stack to your default AWS account/region
- * `cdk diff`        compare deployed stack with current state
- * `cdk docs`        open CDK documentation
-
-Enjoy!

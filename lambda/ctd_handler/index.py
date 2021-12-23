@@ -19,17 +19,6 @@ FUNC_NAME = os.environ['AWS_LAMBDA_FUNCTION_NAME']
 LOG_GROUP = os.environ['AWS_LAMBDA_LOG_GROUP_NAME']
 LOG_STREAM = os.environ['AWS_LAMBDA_LOG_STREAM_NAME']
 
-def get_missingness(df):
-    
-    #Replace -999 values with nan
-    df = df.replace('.*-999.00', np.nan, regex=True)
-    df = df.replace(-999.00, np.nan)
-    df = df.replace(-999, np.nan)
-    
-    missingness_rates = df.isna().sum()
-    missingness_rates['df_len'] = len(df)
-    
-    return missingness_rates
 def handle_zip(byte_data):
     dfs = []
     with zipfile.ZipFile(byte_data) as zip:
@@ -54,11 +43,8 @@ def handle_zip(byte_data):
                     #Read remaining lines as a csv, get column names and save results
                     df = pd.read_csv(io.StringIO(''.join(without_header)))
                     
-                    #CHANGE THIS TO RETURN FULL DATAFRAME
                     dfs.append(df)
                     
-                    dfs.append(get_missingness(df))
-        #zip_cols.append(cols_in_subfile)
     return dfs
 
 def handler(event, context):
@@ -79,6 +65,7 @@ def handler(event, context):
         print("File Parsed")
 
         #Write aggregate values to db
+        #TODO: Add different aggregation functions here
         total_observations = sum([len(df) for df in dfs])
         item = {
             'filename': key,

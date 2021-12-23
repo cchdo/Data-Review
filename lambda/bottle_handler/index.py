@@ -18,17 +18,6 @@ FUNC_NAME = os.environ['AWS_LAMBDA_FUNCTION_NAME']
 LOG_GROUP = os.environ['AWS_LAMBDA_LOG_GROUP_NAME']
 LOG_STREAM = os.environ['AWS_LAMBDA_LOG_STREAM_NAME']
 
-def get_missingness(df):
-    
-    #Replace -999 values with nan
-    df = df.replace('.*-999.00', np.nan, regex=True)
-    df = df.replace(-999.00, np.nan)
-    df = df.replace(-999, np.nan)
-    
-    missingness_rates = df.isna().sum()
-    missingness_rates['df_len'] = len(df)
-    
-    return missingness_rates
 
 def handle_csv(byte_data):
     """
@@ -51,12 +40,8 @@ def handle_csv(byte_data):
     #Read remaining lines as a csv, get column names and save results
     df = pd.read_csv(io.StringIO('\n'.join(without_header)))
 
-    #RETURN HERE TO RETURN FULL DATAFRAME
     return df
 
-    #Get missingness rates
-    missingness_rates = get_missingness(df)
-    return missingness_rates
 
 def handler(event, context):
     print('request: {}'.format(json.dumps(event)))
@@ -76,6 +61,7 @@ def handler(event, context):
         print("File Parsed")
 
         #Write aggregate values to db
+        #TODO: Add different aggregation functions here
         item = {
             'filename': key,
             'observations': len(df)
